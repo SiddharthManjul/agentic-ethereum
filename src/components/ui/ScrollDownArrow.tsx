@@ -1,11 +1,13 @@
+"use client";
+
 export default function ScrollDownArrow({ targetRef }: { targetRef: React.RefObject<HTMLDivElement | null> }) {
-    const scrollToTarget = () => {
-        if (targetRef.current) {
-          const offset = 50; // Adjust this value as needed
-          const targetPosition = targetRef.current.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: targetPosition, behavior: "smooth" });
-        }
-      };
+  const scrollToTarget = () => {
+    if (targetRef.current) {
+      const offset = 60; // Adjust this value as needed
+      const targetPosition = targetRef.current.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: targetPosition, behavior: "smooth" });
+    }
+  };
 
   return (
     <div
