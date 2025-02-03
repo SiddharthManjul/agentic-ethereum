@@ -10,15 +10,18 @@ export default function Home() {
   const whySectionRef = useRef<HTMLDivElement>(null);
 
   return (
-    <>
-      <Navbar homeSectionRef={homeSectionRef} />
-      <div ref={homeSectionRef} className="h-screen w-screen bg-black overflow-x-hidden relative">
+    <div className="min-h-screen bg-black">
+      <Navbar 
+        homeSectionRef={homeSectionRef} 
+        whySectionRef={whySectionRef}
+      />
+      <div ref={homeSectionRef} className="h-screen bg-black relative">
         <AuroraBackgroundDemo />
         <ScrollDownArrow targetRef={whySectionRef} />
       </div>
-      <div ref={whySectionRef} className="h-screen w-screen overflow-x-hidden">
+      <div ref={whySectionRef} className="h-screen bg-black">
         <Why />
       </div>
-    </>
+    </div>
   );
 }

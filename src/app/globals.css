@@ -6,11 +6,28 @@
   font-family: "Teknaf";
   src: url("/fonts/TeknafRegular-rv0aB.otf") format("opentype");
 }
-html, body {
+
+:root {
+  background: black;
+}
+
+html {
+  overflow: scroll;
   overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  width: 0;  /* Chrome and Safari */
+  background: transparent;
+}
+
+body {
   margin: 0;
   padding: 0;
   width: 100%;
+  background: black;
 }
 
 * {

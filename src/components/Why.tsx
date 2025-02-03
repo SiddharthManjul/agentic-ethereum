@@ -15,7 +15,7 @@ export default function Why() {
         className="mb-10 font-Teknaf"
       >
         <h1 className="text-white text-4xl capitalize tracking-wider font-semibold">
-          Why was Y.U.M.I. created ?
+          Why was S.Y.N.X. created ?
         </h1>
       </motion.div>
       <div className="w-full px-10">
