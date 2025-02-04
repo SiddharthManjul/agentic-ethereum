@@ -1,29 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { TextGenerateEffect } from "./text-generate-effect";
 import { InteractiveHoverButton } from "./interactive-hover-button";
-import { usePrivy } from "@privy-io/react-auth";
-import { generateChatId } from "@/lib/utils";
 import { AuroraBackground } from "./aurora-background";
 import { toast } from "react-hot-toast"
 
 const words = "Experience the most seamless Agentic Blockchain LLM you have ever had.";
 
 export function AuroraBackgroundDemo() {
-  const router = useRouter();
-  const { login, authenticated } = usePrivy();
-
-  const handleStartChat = () => {
-    if (!authenticated) {
-      login();
-      return;
-    }
-    const chatId = generateChatId();
-    toast.success('Chat Started!');
-    router.push(`/chat/${chatId}`);
-  };
 
   return (
     <AuroraBackground className="h-screen relative bg-black">
@@ -48,13 +33,8 @@ export function AuroraBackgroundDemo() {
           <div className="font-extralight text-base md:text-2xl text-gray-200 py-4 text-center">
             <TextGenerateEffect words={words} />
           </div>
-          <button
-            onClick={handleStartChat}
-            className="bg-black rounded-full w-fit text-white px-6 py-3 hover:scale-105 hover:bg-white hover:text-black duration-200"
-          >
-            {authenticated ? 'Chat Now' : 'Connect Wallet to Chat'}
-          </button>
-          <div>
+          
+          <div className="mt-16">
             <h3 className="text-gray-400 text-sm">Powered by CDP and Privy</h3>
           </div>
         </motion.div>
@@ -70,7 +50,7 @@ export function AuroraBackgroundDemo() {
               });
             }}
           >
-            {authenticated ? 'Connected' : 'Connect Wallet'}
+            {navigator.onLine ? 'Online' : 'Offline'}
           </InteractiveHoverButton>
         </div>
       </div>

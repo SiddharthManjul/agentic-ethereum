@@ -70,7 +70,9 @@ export function Navbar({
                   Why
                 </button>
                 <button className="hover:text-white text-gray-300 px-3 py-2 rounded-md text-sm transition-all duration-200">
-                  Features
+                  <a href="https://github.com/Webentia-Labs/agentic-ethereum" target="_blank" rel="noopener noreferrer" className="underline">
+                  GitHub
+                  </a>
                 </button>
                 {authenticated ? (
                   <>

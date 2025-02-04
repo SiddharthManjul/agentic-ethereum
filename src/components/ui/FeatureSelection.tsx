@@ -55,7 +55,7 @@ export default function FeaturesSectionDemo() {
     },
   ]
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-10 max-w-7xl mx-auto bg-black bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:14px_24px]">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-6 max-w-7xl mx-auto bg-black bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:14px_24px]">
       {features.map((feature, index) => (
         <Feature key={feature.title} {...feature} index={index} />
       ))}
@@ -76,12 +76,12 @@ const Feature = ({
 }) => {
   return (
     <div
-      className={cn(
-        "flex flex-col lg:border-r py-10 relative group/feature border-zinc-800",
-        (index === 0 || index === 4) && "lg:border-l border-zinc-800",
-        index < 4 && "lg:border-b border-zinc-800",
-      )}
-    >
+    className={cn(
+      "flex flex-col lg:border-r py-6 relative group/feature border-zinc-800", // Reduced padding
+      (index === 0 || index === 4) && "lg:border-l border-zinc-800",
+      index < 4 && "lg:border-b border-zinc-800",
+    )}
+  >
       {index < 4 && (
         <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-zinc-900 to-transparent pointer-events-none" />
       )}
