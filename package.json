@@ -7,17 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "agent": "tsx src/Providers/agentProvider.tsx"
+    "agent": "tsx src/Providers/agentProvider.ts"
   },
   "dependencies": {
-
-    "@prisma/client": "^6.3.1",
     "@coinbase/agentkit": "^0.1.1",
     "@coinbase/agentkit-langchain": "^0.1.0",
     "@coinbase/cdp-langchain": "^0.0.15",
     "@langchain/core": "^0.3.37",
     "@langchain/langgraph": "^0.2.44",
     "@langchain/openai": "^0.4.2",
+    "@prisma/client": "^6.3.1",
     "@privy-io/react-auth": "^2.2.1",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.1",
@@ -52,6 +51,7 @@
     "postcss": "^8",
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   },
   "overrides": {
