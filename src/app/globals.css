@@ -34,3 +34,14 @@ body {
   box-sizing: border-box;
   max-width: 100%;
 }
+
+/* Add to your global CSS */
+.typing-animation::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
