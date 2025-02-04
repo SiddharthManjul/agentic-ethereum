@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+
 import {
     AgentKit,
     CdpWalletProvider,
@@ -20,10 +23,12 @@ import {
   import * as readline from "readline";
   
   dotenv.config();
-  
+  const WALLET_DATA_FILE = process.env.NODE_ENV === 'production' 
+  ? '/tmp/wallet_data.txt'  // Use appropriate path for production
+  : './wallet_data.txt';
   validateEnvironment();
   
-  const WALLET_DATA_FILE = "wallet_data.txt";
+  // const WALLET_DATA_FILE = "wallet_data.txt";
   
   /**
    * Validates the required environment variables are set
@@ -301,4 +306,6 @@ import {
       process.exit(1);
     });
   }
+
+  export { initializeAgent };
   

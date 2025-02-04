@@ -46,10 +46,10 @@ export default function ChatPage() {
                   router.push('/');
                   toast.error('Left the chat successfully!');
                 }}
-                className="bg-red-900/80 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors"
+                className="bg-red-900/80 hover:bg-red-900 text-white px-4 py-2 transition-colors rounded"
               >
                 <LogOut className="h-5 w-5 mr-2" />
-                Exit Chat
+                <span className="hidden sm:inline">Exit Chat</span>
               </Button>
             </div>
           </div>
@@ -57,8 +57,10 @@ export default function ChatPage() {
       </motion.div>
 
       {/* Chat Interface */}
-      <div className="flex-1 pt-24 container mx-auto px-4">
-        <ChatInterface />
+      <div className="flex-1 pt-20 pb-4">
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ChatInterface />
+        </div>
       </div>
     </div>
   );
