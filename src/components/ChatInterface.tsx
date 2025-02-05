@@ -2,9 +2,9 @@
 "use client";
 import { useState, useRef, useEffect } from 'react';
 import { SyncLoader } from 'react-spinners';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { BrainCircuit, Send } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card } from './ui/card';
 import ReactMarkdown from 'react-markdown';
 
 interface Message {

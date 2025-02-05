@@ -1,9 +1,9 @@
 "use client";
-import { AuroraBackgroundDemo } from "@/components/ui/AuroraBackgroundDemo";
-import ScrollDownArrow from "@/components/ui/ScrollDownArrow";
-import Why from "@/components/Why";
+import { AuroraBackgroundDemo } from "../components/ui/AuroraBackgroundDemo";
+import ScrollDownArrow from "../components/ui/ScrollDownArrow";
+import Why  from "../components/Why";
 import { useRef } from "react";
-import { Navbar } from "@/components/ui/Navbar";
+import { Navbar } from "../components/ui/Navbar";
 
 export default function Home() {
   const homeSectionRef = useRef<HTMLDivElement>(null);
@@ -11,8 +11,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Navbar 
-        homeSectionRef={homeSectionRef} 
+      <Navbar
+        homeSectionRef={homeSectionRef}
         whySectionRef={whySectionRef}
       />
       <div ref={homeSectionRef} className="h-screen bg-black relative">
