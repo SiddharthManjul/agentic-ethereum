@@ -46,3 +46,4 @@ yarn.lock
 ```
 .wallet*
 wallet*
+/tmp/wallet_data.txt
