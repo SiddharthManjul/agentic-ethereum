@@ -15,11 +15,6 @@
     "incremental": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "baseUrl": ".",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -1,10 +1,10 @@
 "use client";
 
 import ChatInterface from "@/components/ChatInterface";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { LogOut, BrainCircuit } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useParams } from 'next/navigation';
