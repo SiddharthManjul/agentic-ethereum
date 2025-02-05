@@ -2,9 +2,7 @@
 
 import { motion } from "framer-motion";
 import { TextGenerateEffect } from "./text-generate-effect";
-import { InteractiveHoverButton } from "./interactive-hover-button";
 import { AuroraBackground } from "./aurora-background";
-import { toast } from "react-hot-toast"
 
 const words = "Experience the most seamless Agentic Blockchain LLM you have ever had.";
 
@@ -38,21 +36,6 @@ export function AuroraBackgroundDemo() {
             <h3 className="text-gray-400 text-sm">Powered by CDP and Privy</h3>
           </div>
         </motion.div>
-
-        {/* Bottom right connection status */}
-        <div className="absolute bottom-8 right-8">
-          <InteractiveHoverButton 
-            className="border-white/10 text-white"
-            onClick={() => {
-              toast.success('GM GM!', {
-                icon: '🫡',
-                duration: 1500
-              });
-            }}
-          >
-            {navigator.onLine ? 'Online' : 'Offline'}
-          </InteractiveHoverButton>
-        </div>
       </div>
     </AuroraBackground>
   );
