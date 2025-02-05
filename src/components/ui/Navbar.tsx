@@ -3,7 +3,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { motion } from "framer-motion";
 import { BrainCircuit } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { generateChatId } from "@/lib/utils";
+import { generateChatId } from "../../lib/utils";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
 
