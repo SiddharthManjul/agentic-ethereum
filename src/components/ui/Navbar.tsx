@@ -145,7 +145,7 @@ export function Navbar({
                     className="bg-white/10 text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm border border-white/20 transition-all duration-300"
                     disabled={disableLogin}
                     onClick={() => {
-                      login({ disableSignup: true });
+                      login();
                     }}
                   >
                     Login
