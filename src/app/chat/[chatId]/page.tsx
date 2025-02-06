@@ -8,18 +8,33 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useParams } from 'next/navigation';
-
+import { usePrivy } from "@privy-io/react-auth";
 
 export default function ChatPage() {
   const router = useRouter();
   const params = useParams();
+  const { authenticated, user } = usePrivy();
   const [mounted, setMounted] = useState(false);
 
+  // Group all useEffect hooks together at the top level
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (mounted && !authenticated) {
+      router.push('/');
+      toast.error('Please login to access the chat');
+    }
+  }, [mounted, authenticated, router]);
+
+  // Early return if not mounted
   if (!mounted) {
+    return null;
+  }
+
+  // Early return if not authenticated
+  if (!authenticated || !user) {
     return null;
   }
 
