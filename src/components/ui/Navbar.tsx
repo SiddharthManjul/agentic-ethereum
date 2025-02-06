@@ -1,4 +1,4 @@
-"use client";
+// Navbar.tsx
 import { usePrivy } from "@privy-io/react-auth";
 import { motion } from "framer-motion";
 import { BrainCircuit } from "lucide-react";
@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { generateChatId } from "../../lib/utils";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+
 
 export function Navbar({ 
   homeSectionRef,
@@ -15,11 +16,44 @@ export function Navbar({
   whySectionRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const router = useRouter();
+  const { user, authenticated } = usePrivy();
 
-  const handleStartChat = () => {
+  const handleStartChat = async () => {
     const chatId = generateChatId();
+    const userId = user?.id; // Ensure this retrieves the correct user ID
+    console.log(userId);
+    if (!userId) {
+        console.error('User ID is not available');
+        toast.error('You must be logged in to start a chat.');
+        return;
+    }
+
+    console.log('Starting chat with User ID:', userId);
+
+    // Send a POST request to create a new chat session
+    const response = await fetch(`/api/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: "Start a new chat", // Customize this message as needed
+            userId: userId, // Ensure userId is included here
+            chatId: chatId,
+        }),
+    });
+
+    if (!response.ok) {
+        console.error('Failed to start chat:', response.statusText);
+        toast.error('Failed to start chat.');
+        return;
+    }
+
+    // Redirect to the chat interface after successfully starting the chat
     router.push(`/chat/${chatId}`);
-  };
+};
+
+
 
   const scrollToHome = () => {
     if (homeSectionRef.current) {
@@ -33,17 +67,34 @@ export function Navbar({
     }
   };
 
-  const { login, ready, authenticated, user } = usePrivy();
+  const { login, ready} = usePrivy();
   const disableLogin = !ready || (ready && authenticated);
   
   useEffect(() => {
-    if (authenticated) {
+    if (authenticated && user?.id) {
       toast.success('Logged in Successfully!', {
         id: 'auth-success',
         duration: 2000
       });
+
+      // Create or upsert the user record in your database
+      fetch('/api/createUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          did: user.id, // Privy DID
+          email: user?.email?.address || null,
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('User record created or updated:', data);
+      })
+      .catch(err => console.error('Error creating user:', err));
     }
-  }, [authenticated]);
+  }, [authenticated, user]);
 
   return (
     <motion.div
@@ -71,7 +122,7 @@ export function Navbar({
                 </button>
                 <button className="hover:text-white text-gray-300 px-3 py-2 rounded-md text-sm transition-all duration-200">
                   <a href="https://github.com/Webentia-Labs/agentic-ethereum" target="_blank" rel="noopener noreferrer" className="underline">
-                  GitHub
+                    GitHub
                   </a>
                 </button>
                 {authenticated ? (
@@ -83,7 +134,7 @@ export function Navbar({
                       className="bg-white/10 text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm border border-white/20 transition-all duration-300"
                       onClick={() => {
                         handleStartChat();
-                        toast.success('Joined the Chat!')
+                        toast.success('Joined the Chat!');
                       }}
                     >
                       Chat
@@ -94,9 +145,7 @@ export function Navbar({
                     className="bg-white/10 text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm border border-white/20 transition-all duration-300"
                     disabled={disableLogin}
                     onClick={() => {
-                      login({
-                        disableSignup: true,
-                      });
+                      login({ disableSignup: true });
                     }}
                   >
                     Login

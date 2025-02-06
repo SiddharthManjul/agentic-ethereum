@@ -6,6 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { BrainCircuit, Send } from 'lucide-react';
 import { Card } from './ui/card';
 import ReactMarkdown from 'react-markdown';
+import { usePrivy } from '@privy-io/react-auth';
+import { useParams } from 'next/navigation';
+
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +16,8 @@ interface Message {
 }
 
 export default function ChatInterface() {
+  const { user } = usePrivy();
+  const params = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,74 +31,82 @@ export default function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
- // src/components/ChatInterface.tsx
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!input.trim()) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
 
-  const userMessage: Message = { role: 'user', content: input };
-  setMessages(prev => [...prev, userMessage]);
-  setInput('');
-  setIsLoading(true);
+    // Check if user is authenticated
+    if (!user?.id) {
+      console.error('User not authenticated');
+      return;
+    }
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: input }),
-    });
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
 
-    if (!response.ok) throw new Error('Network response was not ok');
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: input,
+          userId: user.id,
+          chatId: params?.chatId
+        }),
+      });
 
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error('No reader available');
+      if (!response.ok) throw new Error('Network response was not ok');
 
-    const assistantMessage: Message = { role: 'assistant', content: '' };
-    setMessages(prev => [...prev, assistantMessage]);
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No reader available');
 
-    const decoder = new TextDecoder();
-    let buffer = '';
-    
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-    
-      buffer += decoder.decode(value, { stream: true });
-    
-      // Process complete SSE events
-      while (buffer.includes('\n\n')) {
-        const eventEndIndex = buffer.indexOf('\n\n');
-        const eventData = buffer.slice(0, eventEndIndex);
-        buffer = buffer.slice(eventEndIndex + 2);
-    
-        const lines = eventData.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const content = JSON.parse(line.slice(6));
-              setMessages(prev => {
-                const newMessages = [...prev];
-                const lastMessage = newMessages[newMessages.length - 1];
-    
-                // Check if the last message content is the same as the new content
-                if (lastMessage.role === 'assistant' && lastMessage.content !== content) {
-                  lastMessage.content += content;
-                }
-                return newMessages;
-              });
-            } catch (error) {
-              console.error('Error parsing SSE data:', error);
+      const assistantMessage: Message = { role: 'assistant', content: '' };
+      setMessages(prev => [...prev, assistantMessage]);
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+      
+        buffer += decoder.decode(value, { stream: true });
+      
+        while (buffer.includes('\n\n')) {
+          const eventEndIndex = buffer.indexOf('\n\n');
+          const eventData = buffer.slice(0, eventEndIndex);
+          buffer = buffer.slice(eventEndIndex + 2);
+      
+          const lines = eventData.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const content = JSON.parse(line.slice(6));
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  const lastMessage = newMessages[newMessages.length - 1];
+      
+                  if (lastMessage.role === 'assistant' && lastMessage.content !== content) {
+                    lastMessage.content += content;
+                  }
+                  return newMessages;
+                });
+              } catch (error) {
+                console.error('Error parsing SSE data:', error);
+              }
             }
           }
         }
       }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
+
 
   return (
     <Card className="bg-zinc-950 border border-zinc-800 backdrop-blur-sm h-full flex flex-col">
