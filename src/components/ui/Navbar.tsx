@@ -19,41 +19,37 @@ export function Navbar({
   const { user, authenticated } = usePrivy();
 
   const handleStartChat = async () => {
-    const chatId = generateChatId();
-    const userId = user?.id; // Ensure this retrieves the correct user ID
-    console.log(userId);
-    if (!userId) {
-        console.error('User ID is not available');
-        toast.error('You must be logged in to start a chat.');
-        return;
+    if (!user?.id) {
+      toast.error('You must be logged in to start a chat.');
+      return;
     }
+    
+    const chatId = generateChatId();
 
-    console.log('Starting chat with User ID:', userId);
-
-    // Send a POST request to create a new chat session
-    const response = await fetch(`/api/chat`, {
+    try {
+      // Create chat in database first
+      const response = await fetch('/api/chats', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            message: "Start a new chat", // Customize this message as needed
-            userId: userId, // Ensure userId is included here
-            chatId: chatId,
-        }),
-    });
+          chatId,
+          userId: user.id,
+          title: chatId
+        })
+      });
 
-    if (!response.ok) {
-        console.error('Failed to start chat:', response.statusText);
-        toast.error('Failed to start chat.');
-        return;
+      if (!response.ok) throw new Error('Failed to create chat');
+
+      // Navigate to new chat after successful creation
+      router.push(`/chat/${chatId}`);
+      toast.success('Started new chat!');
+    } catch (error) {
+      toast.error('Failed to create new chat');
+      console.error('Error creating chat:', error);
     }
-
-    // Redirect to the chat interface after successfully starting the chat
-    router.push(`/chat/${chatId}`);
-};
-
-
+  };
 
   const scrollToHome = () => {
     if (homeSectionRef.current) {

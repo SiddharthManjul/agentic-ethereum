@@ -15,11 +15,11 @@ html {
   overflow: scroll;
   overflow-x: hidden;
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
 html::-webkit-scrollbar {
-  width: 0;  /* Chrome and Safari */
+  width: 0; /* Chrome and Safari */
   background: transparent;
 }
 
@@ -37,11 +37,26 @@ body {
 
 /* Add to your global CSS */
 .typing-animation::after {
-  content: '|';
+  content: "|";
   animation: blink 1s step-end infinite;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

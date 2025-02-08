@@ -1,7 +1,7 @@
 "use client";
-
-import ChatInterface from "../../../components/ChatInterface";
-import { Button } from "../../../components/ui/button";
+// src/app/chat/[chatid]/page.tsx
+import ChatInterface from "@/components/ChatInterface";
+import { ChatSidebar } from "@/components/ChatSidebar";
 import { motion } from "framer-motion";
 import { LogOut, BrainCircuit } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,6 @@ export default function ChatPage() {
   const { authenticated, user } = usePrivy();
   const [mounted, setMounted] = useState(false);
 
-  // Group all useEffect hooks together at the top level
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -28,19 +27,13 @@ export default function ChatPage() {
     }
   }, [mounted, authenticated, router]);
 
-  // Early return if not mounted
-  if (!mounted) {
-    return null;
-  }
-
-  // Early return if not authenticated
-  if (!authenticated || !user) {
+  if (!mounted || !authenticated || !user) {
     return null;
   }
 
   return (
-    <div className="h-screen bg-black flex flex-col">
-      {/* Custom Chat Nav */}
+    <div className="min-h-screen bg-black">
+      {/* Navbar */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,25 +49,30 @@ export default function ChatPage() {
                   Chat ID: {params?.chatId}
                 </span>
               </div>
-              <Button
+              <button
                 onClick={() => {
                   router.push('/');
-                  toast.error('Left the chat successfully!');
+                  toast.success('Left chat room');
                 }}
-                className="bg-red-900/80 hover:bg-red-900 text-white px-4 py-2 transition-colors rounded"
+                className="bg-red-900/80 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
               >
-                <LogOut className="h-5 w-5 mr-2" />
+                <LogOut className="h-5 w-5" />
                 <span className="hidden sm:inline">Exit Chat</span>
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Chat Interface */}
-      <div className="flex-1 pt-20 pb-4">
-        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ChatInterface />
+      {/* Main content area */}
+      <div className="pt-20 pb-4 flex h-screen">
+        <div className="flex-1">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8">
+            <ChatInterface />
+          </div>
+        </div>
+        <div className="h-[calc(100vh-6rem)] mt-0">
+          <ChatSidebar />
         </div>
       </div>
     </div>

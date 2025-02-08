@@ -2,43 +2,104 @@
 import { NextRequest } from 'next/server';
 import { HumanMessage } from '@langchain/core/messages';
 import { initializeAgent } from '@/Providers/agentProvider';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
+
+// Add enum for message sender
+enum MessageSender {
+  USER = 'user',
+  ASSISTANT = 'assistant'
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { message, userId } = body;
+    const { message, userId, chatId, isFirstMessage } = await req.json();
     
-    if (!userId) {
-      throw new Error("userId is required");
+    if (!message || !userId || !chatId) {
+      return new Response(
+        JSON.stringify({ error: "Message, userId, and chatId are required" }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
+    // Create chat if it's first message
+    if (isFirstMessage) {
+      try {
+        await prisma.chat.create({
+          data: {
+            id: chatId,
+            userId,
+            title: message.slice(0, 50)
+          }
+        });
+      } catch (error: any) {
+        // Ignore unique constraint error since chat might already exist
+        if (error.code !== 'P2002') throw error;
+      }
+    }
+
+    // Save user message
+    await prisma.message.create({
+      data: {
+        content: message,
+        chatId,
+        sender: MessageSender.USER
+      }
+    });
+
+    // Get or initialize agent
     const agent = await initializeAgent({ userId });
+
     const agentStream = await agent.stream(
       { messages: [new HumanMessage(message)] },
-      { configurable: { thread_id: "SYNX" } }
+      { configurable: { thread_id: chatId } }
     );
 
     const encoder = new TextEncoder();
     const stream = new TransformStream();
     const writer = stream.writable.getWriter();
 
+    let accumulatedContent = '';
+    
     (async () => {
       try {
         for await (const chunk of agentStream) {
           if ("agent" in chunk) {
-            let content = chunk.agent.messages[0].content;
+            const content = chunk.agent.messages[0].content;
             
-            try {
-              // Try to parse as JSON first
-              content = JSON.parse(content);
-            } catch (e) {
-              // Only remove quotes for non-JSON content
-              content = content.replace(/^"|"$/g, '');
+            if (content && content !== accumulatedContent) {
+              const delta = content.slice(accumulatedContent.length);
+              if (delta) {
+                await writer.write(
+                  encoder.encode(`data: ${JSON.stringify({ content: delta })}\n\n`)
+                );
+                accumulatedContent = content;
+              }
             }
-            await writer.write(encoder.encode(`data: ${JSON.stringify(content)}\n\n`));
           }
         }
+
+        // Save the complete response to database
+        if (accumulatedContent) {
+          await prisma.message.create({
+            data: {
+              content: accumulatedContent,
+              chatId,
+              sender: 'assistant'
+            }
+          });
+        }
+
+        // Send DONE event only after saving
+        await writer.write(encoder.encode('data: [DONE]\n\n'));
+      } catch (error) {
+        console.error('Stream error:', error);
+        await writer.write(
+          encoder.encode(
+            `data: ${JSON.stringify({ error: 'Error processing response' })}\n\n`
+          )
+        );
       } finally {
         await writer.close();
       }
@@ -51,13 +112,57 @@ export async function POST(req: NextRequest) {
         'Connection': 'keep-alive',
       },
     });
+
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-    console.error('Error processing request:', { error: errorMessage });
-    
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    console.error('Error processing request:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal Server Error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+// Add GET endpoint for loading chat messages
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const chatId = searchParams.get('chatId');
+
+    if (!chatId) {
+      return new Response(
+        JSON.stringify({ error: "chatId is required" }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const messages = await prisma.message.findMany({
+      where: { chatId },
+      orderBy: { timestamp: 'asc' },
+      select: {
+        id: true,
+        content: true,
+        sender: true,
+        timestamp: true
+      }
     });
+
+    // Transform messages to match the UI format
+    const formattedMessages = messages.map(msg => ({
+      role: msg.sender === 'assistant' ? 'assistant' : 'user',
+      content: msg.content,
+      sender: msg.sender,
+      timestamp: msg.timestamp
+    }));
+
+    return new Response(
+      JSON.stringify(formattedMessages),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to fetch messages' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

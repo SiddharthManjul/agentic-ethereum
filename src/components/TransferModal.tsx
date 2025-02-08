@@ -50,7 +50,7 @@ export function TransferModal({ isOpen, onClose, data, message }: TransferModalP
                 href={`https://sepolia.basescan.org/tx/${data.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-orange-500 hover:text-orange-400"
+                className="text-orange-500 hover:text-orange-400 underline"
               >
                 {data.txHash.slice(0, 6)}...{data.txHash.slice(-4)}
               </a>
