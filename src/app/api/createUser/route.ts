@@ -7,19 +7,28 @@ const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId } = body;
+    const { did, email } = body;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    if (!did) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    const user = await prisma.user.create({
-      data: { id: userId }
+    // Use upsert instead of create
+    const user = await prisma.user.upsert({
+      where: { 
+        id: did 
+      },
+      update: { 
+        email: email || null
+      },
+      create: {
+        id: did,
+        email: email || null
+      }
     });
 
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    // Properly format the error object
     const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
     console.error('Failed to create user:', { error: errorMessage });
     
