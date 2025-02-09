@@ -129,16 +129,31 @@ export default function ChatInterface() {
                 const parsedContent = JSON.parse(rawContent);
                 const agentContent = parsedContent.content;
   
-                // Store original content for DB
-                dbSafeMessage += agentContent;
-  
                 try {
-                  const agentData = typeof agentContent === 'string' 
-                    ? JSON.parse(agentContent)
-                    : agentContent;
+                  // First try to parse as JSON
+                  let agentData;
+                  if (typeof agentContent === 'string') {
+                    try {
+                      agentData = JSON.parse(agentContent);
+                    } catch {
+                      // If it's not JSON, use it as plain text
+                      setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMessage = newMessages[newMessages.length - 1];
+                        if (lastMessage.role === 'assistant') {
+                          lastMessage.content = (lastMessage.content + agentContent).trim();
+                        }
+                        return newMessages;
+                      });
+                      dbSafeMessage = agentContent;
+                      continue;
+                    }
+                  } else {
+                    agentData = agentContent;
+                  }
   
+                  // Handle transfer data if present
                   if (agentData?.tool === 'nativeTransfer' && agentData.parameters) {
-                    // Create formatted message for chat
                     const formattedMessage = [
                       "✅ **Transaction Successful**",
                       "",
@@ -149,7 +164,6 @@ export default function ChatInterface() {
                       `**Status:** ${agentData.parameters.txHash ? 'Completed' : 'Pending'}`
                     ].join('\n');
   
-                    // Update chat message
                     setMessages(prev => {
                       const newMessages = [...prev];
                       const lastMessage = newMessages[newMessages.length - 1];
@@ -159,7 +173,6 @@ export default function ChatInterface() {
                       return newMessages;
                     });
   
-                    // Show transfer modal
                     setTransferModalData({
                       data: {
                         amount: agentData.parameters.amount,
@@ -169,11 +182,31 @@ export default function ChatInterface() {
                       message: agentData.your_summary
                     });
                     
-                    // Store only the summary for database
                     dbSafeMessage = agentData.your_summary;
+                  } else {
+                    // Handle regular message
+                    setMessages(prev => {
+                      const newMessages = [...prev];
+                      const lastMessage = newMessages[newMessages.length - 1];
+                      if (lastMessage.role === 'assistant') {
+                        lastMessage.content = (lastMessage.content + agentContent).trim();
+                      }
+                      return newMessages;
+                    });
+                    dbSafeMessage = agentContent;
                   }
-                } catch (innerError) {
-                  console.log('Non-JSON content, treating as normal message');
+                } catch (error) {
+                  console.error('Error processing message:', error);
+                  // Handle as plain text if JSON parsing fails
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    if (lastMessage.role === 'assistant') {
+                      lastMessage.content = (lastMessage.content + agentContent).trim();
+                    }
+                    return newMessages;
+                  });
+                  dbSafeMessage = agentContent;
                 }
               } catch (error) {
                 console.error('Error processing chunk:', error);
