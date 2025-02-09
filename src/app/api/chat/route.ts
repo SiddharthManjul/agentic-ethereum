@@ -1,4 +1,7 @@
 // src/app/api/chat/route.ts
+export const dynamic = 'force-dynamic';
+
+
 import { NextRequest } from 'next/server';
 import { HumanMessage } from '@langchain/core/messages';
 import { initializeAgent } from '@/Providers/agentProvider';
