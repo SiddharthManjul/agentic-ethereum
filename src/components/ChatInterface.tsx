@@ -133,12 +133,12 @@ export default function ChatInterface() {
                 dbSafeMessage += agentContent;
   
                 try {
-                  const agentData = JSON.parse(agentContent);
-                  
-                  if (agentData?.tool === 'nativeTransfer') {
-                    transferData = agentData;
-                    
-                    // Create user-facing message
+                  const agentData = typeof agentContent === 'string' 
+                    ? JSON.parse(agentContent)
+                    : agentContent;
+  
+                  if (agentData?.tool === 'nativeTransfer' && agentData.parameters) {
+                    // Create formatted message for chat
                     const formattedMessage = [
                       "✅ **Transaction Successful**",
                       "",
@@ -149,7 +149,7 @@ export default function ChatInterface() {
                       `**Status:** ${agentData.parameters.txHash ? 'Completed' : 'Pending'}`
                     ].join('\n');
   
-                    // Update UI with formatted message
+                    // Update chat message
                     setMessages(prev => {
                       const newMessages = [...prev];
                       const lastMessage = newMessages[newMessages.length - 1];
@@ -159,10 +159,7 @@ export default function ChatInterface() {
                       return newMessages;
                     });
   
-                    // Update DB-safe message
-                    dbSafeMessage = agentData.your_summary;
-  
-                    // Show modal
+                    // Show transfer modal
                     setTransferModalData({
                       data: {
                         amount: agentData.parameters.amount,
@@ -171,17 +168,12 @@ export default function ChatInterface() {
                       },
                       message: agentData.your_summary
                     });
+                    
+                    // Store only the summary for database
+                    dbSafeMessage = agentData.your_summary;
                   }
-                } catch {
-                  // Regular message flow
-                  setMessages(prev => {
-                    const newMessages = [...prev];
-                    const lastMessage = newMessages[newMessages.length - 1];
-                    if (lastMessage.role === 'assistant') {
-                      lastMessage.content += agentContent;
-                    }
-                    return newMessages;
-                  });
+                } catch (innerError) {
+                  console.log('Non-JSON content, treating as normal message');
                 }
               } catch (error) {
                 console.error('Error processing chunk:', error);
